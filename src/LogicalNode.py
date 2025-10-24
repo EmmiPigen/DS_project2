@@ -24,10 +24,28 @@ class LogicalNode(ABC):
     threading.Thread(target=self.listen, daemon=True).start()
     threading.Thread(target=self.process_message, daemon=True).start()
 
-  @abstractmethod
   def listen(self):
-    pass
-
+    """Listens and receives incoming messages from other nodes via the simulator."""
+    
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(("localhost", self.PORT_BASE + self.node_Id))
+    server.listen()
+    server.settimeout(1.0)
+    
+    print(f"Node {self.node_Id} listening on port {self.PORT_BASE + self.node_Id}")
+    
+    while True:
+      try:
+        conn, _ = server.accept()
+        raw_data = conn.recv(1024).decode("utf-8")
+        print("Message:", raw_data)
+        conn.close()
+        with self.queue_Lock:
+          self.message_Queue.append(raw_data)
+      except socket.timeout:
+        continue
+            
   @abstractmethod
   def process_message(self):
     pass
@@ -35,7 +53,18 @@ class LogicalNode(ABC):
   @abstractmethod
   def handle_message(self, message):
     pass
-
+  
+  def broadcast(self, message):
+    print(f"Node {self.node_Id} broadcasting {message.msg_type} to all known nodes.")
+    for target_Id in self.known_Nodes:
+      if target_Id != self.node_Id:
+        target_message = self._create_message(target_Id, message.msg_type)
+        self.send_message(target_Id, target_message)
+        
+  @abstractmethod
+  def _create_message(self, target_Id, message_type):
+    pass
+    
   def send_message(self, targetId, message):
     try:
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -56,16 +56,21 @@ class VectorClockNode(LogicalNode):
           self.vector_Clock[self.node_Id] += 1  # Increment own entry
           print(f"Node {self.node_Id} updated vector clock to {self.vector_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
+  
   def handle_message(self, msg):
     """Handles the received messages based on their type."""
     return 0
 
-  def send_message(self, targetId, message):
-    return 0
 
   def local_event(self):
     return 0        
 
+  def _create_message(self, target_Id, message_type):
+    """Creates a VectorMessage with the current vector clock."""
+    with self.state_Lock:
+      self.vector_Clock[self.node_Id] += 1 # Increment own entry
+      print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for local event.")
+      return VectorMessage(message_type, self.node_Id, target_Id, self.vector_Clock.copy())
 
 if __name__ == "__main__":
   if len(sys.argv) != 3:

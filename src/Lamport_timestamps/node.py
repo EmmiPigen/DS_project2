@@ -58,14 +58,23 @@ class LamportNode(LogicalNode):
 
   def handle_message(self, msg):
     """Handles the received messages based on their type."""
-    return 0
+    match msg.msg_type:
+      
+      case "REQUEST":
+        # Handle REQUEST message
+        print(f"Node {self.node_Id} handling REQUEST from Node {msg.sender_id}")
+        
 
-  def send_message(self, targetId, message):
-    return 0
 
   def local_event(self):
     return 0
 
+  def _create_message(self, target_Id, message_type):
+    """Creates a LamportMessage with the current Lamport clock."""
+    with self.state_Lock:
+      self.lamport_Clock += 1
+      print (f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for local event.")
+      return LamportMessage(message_type, self.node_Id, target_Id, self.lamport_Clock)
 
 if __name__ == "__main__":
   if len(sys.argv) != 3:
