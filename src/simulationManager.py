@@ -126,3 +126,11 @@ if __name__ == "__main__":
   min_delay = float(sys.argv[2]) if len(sys.argv) > 2 else MIN_DELAY 
   max_delay = float(sys.argv[3]) if len(sys.argv) > 3 else MAX_DELAY 
   sim_manager = SimulationManager(num_nodes, min_delay, max_delay)
+
+  if sim_manager:
+    try:
+      while True:
+        time.sleep(1)
+    except KeyboardInterrupt:
+      print("Simulation Manager shutting down.")
+      sys.exit(0)
