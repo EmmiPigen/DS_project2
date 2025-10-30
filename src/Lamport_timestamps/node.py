@@ -3,24 +3,25 @@
 # src/Lamport_timestamps/node.py
 import os
 import sys
-import pickle
 import socket
 import threading
 import json
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 # autopep8: off
 from src.LogicalNode import LogicalNode
-from lamportMessage import LamportMessage
+from src.Lamport_timestamps.lamportMessage import LamportMessage
 
-from src.simulationManager import NODE_PORT_BASE, SIM_PORT
 # autopep8: on
 
 
 class LamportNode(LogicalNode):
-  def __init__(self, node_Id, known_Nodes):
+  def __init__(self, node_Id, known_Nodes, logger):
     self.lamport_Clock = 0  # Initialize Lamport clock
-    super().__init__(node_Id, known_Nodes)
+    super().__init__(node_Id, known_Nodes, logger)
+
+  def start(self):
+    threading.Thread(target=self.listen, daemon=True).start()
+    threading.Thread(target=self.process_message, daemon=True).start()
 
   def listen(self):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -51,33 +52,48 @@ class LamportNode(LogicalNode):
           msg = self.message_Queue.pop(0)  # Get the first message in the queue
       if msg:
         with self.state_Lock:
-          # Update Lamport clock
+          # Update Lamport clock following Lamport's rules: C = max(C, T) + 1
           self.lamport_Clock = max(self.lamport_Clock, msg.timestamp) + 1
+          self.logger.record_event(self.node_Id, "RECEIVE_MESSAGE", self.lamport_Clock, details=f"Received {msg.msg_type} from Node {msg.sender_id}")
+
           print(f"Node {self.node_Id} updated Lamport clock to {self.lamport_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
 
   def handle_message(self, msg):
     """Handles the received messages based on their type."""
     match msg.msg_type:
-      
+
       case "REQUEST":
         # Handle REQUEST message
         print(f"Node {self.node_Id} handling REQUEST from Node {msg.sender_id}")
-        
+
+      case "RELEASE":
+        pass
+
+      case "CONTACT":  # For testing purposes not for the algorithm
+        print(f"Node {self.node_Id} received CONTACT from Node {msg.sender_id}")
 
   def local_event(self):
-    """Simulates a local event(non-communication event) and increments Lamport clock.""" 
+    """Simulates a local event(non-communication event) and increments Lamport clock."""
+    print(f"Node {self.node_Id} performing local event.")
     with self.state_Lock:
       self.lamport_Clock += 1
-      print (f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for local event.")
-      
+      self.logger.record_event(self.node_Id, "LOCAL_EVENT", self.lamport_Clock)
 
   def _create_message(self, target_Id, message_type):
     """Creates a LamportMessage with the current Lamport clock."""
     with self.state_Lock:
       self.lamport_Clock += 1
-      print (f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for local event.")
+      print(f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for local event.")
       return LamportMessage(message_type, self.node_Id, target_Id, self.lamport_Clock)
+
+  def status(self):
+    print(f" \
+              Node {self.node_Id} \n \
+              Known Nodes: {self.known_Nodes} \n \
+              Lamport Clock: {self.lamport_Clock} \n \
+              Status: {self._status}")
+
 
 if __name__ == "__main__":
   if len(sys.argv) != 3:
@@ -87,7 +103,7 @@ if __name__ == "__main__":
   node_id = int(sys.argv[1])
   known_nodes = list(range(1, int(sys.argv[2]) + 1))  # Assuming known nodes are numbered from 1 to N
 
-  node = LamportNode(node_id, known_nodes)
+  node = LamportNode(node_id, known_nodes, None)
 
   try:
     while True:
@@ -99,23 +115,19 @@ if __name__ == "__main__":
       cmd = full_cmd[0].lower()
 
       if cmd == "status":
-        print(f" \
-              Node {node.node_Id} \n \
-              Known Nodes: {node.known_Nodes} \n \
-              Lamport Clock: {node.lamport_Clock} \n \
-              Status: {node.status}")
-        
+        node.status()
+
       elif cmd == "contact":
         if len(full_cmd) < 2 or not full_cmd[1].isdigit():
           print("Usage: contact <target_node_id>")
           continue
-        
-        try: 
+
+        try:
           target_id = int(full_cmd[1])
           message = node._create_message(target_id, "CONTACT")
           node.send_message(target_id, message)
         except ValueError:
-          print("Invalid target node ID.")        
+          print("Invalid target node ID.")
 
       elif cmd == "exit":
         print(f"Shutting down Node {node.node_Id}.")

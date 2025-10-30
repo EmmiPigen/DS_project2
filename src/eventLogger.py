@@ -6,23 +6,24 @@
 import time
 
 
-
 class EventLogger:
-  def __init__(self):
+  def __init__(self, log_file):
     self.log = []
-  
+    self.log_file = log_file
+    
+    # Clear existing log file
+    with open(self.log_file, "w") as f:
+      f.write("")
+
   def record_event(self, node_id, event_type, clock, details=""):
     timestamp = self.getTime()
-    event = {
-      "timestamp": timestamp,
-      "node_id": node_id,
-      "event_type": event_type,
-      "clock": clock,
-      "details": details
-    }
+    event = f"[{timestamp}] Node {node_id} - {event_type} (Clock: {clock}) {details}"
     self.log.append(event)
-    print(f"[{timestamp}] [LOG] Node {node_id} - {event_type} (Clock: {clock}) {details}")
-  
+    
+    with open(self.log_file, "a") as f:
+      f.write(f"{event}\n")
+    #print(f"[{timestamp}] [LOG] Node {node_id} - {event_type} (Clock: {clock}) {details}")
+
   def get_log(self):
     return self.log
 

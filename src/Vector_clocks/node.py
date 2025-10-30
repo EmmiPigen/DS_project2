@@ -8,19 +8,22 @@ import socket
 import threading
 import json
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # autopep8: off
 from src.LogicalNode import LogicalNode
-from vectorMessage import VectorMessage
+from src.Vector_clocks.vectorMessage import VectorMessage
 
-from src.simulationManager import NODE_PORT_BASE, SIM_PORT
 # autopep8: on
 
+
 class VectorClockNode(LogicalNode):
-  def __init__(self, node_Id, known_Nodes):
+  def __init__(self, node_Id, known_Nodes, logger):
     self.vector_Clock = [0] * len(known_Nodes)  # Initialize vector clock
-    super().__init__(node_Id, known_Nodes)
+    super().__init__(node_Id, known_Nodes, logger)
+
+  def start(self):
+    threading.Thread(target=self.listen, daemon=True).start()
+    threading.Thread(target=self.process_message, daemon=True).start()
 
   def listen(self):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,21 +59,21 @@ class VectorClockNode(LogicalNode):
           self.vector_Clock[self.node_Id] += 1  # Increment own entry
           print(f"Node {self.node_Id} updated vector clock to {self.vector_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
-  
+
   def handle_message(self, msg):
     """Handles the received messages based on their type."""
     return 0
 
-
   def local_event(self):
-    return 0        
+    return 0
 
   def _create_message(self, target_Id, message_type):
     """Creates a VectorMessage with the current vector clock."""
     with self.state_Lock:
-      self.vector_Clock[self.node_Id] += 1 # Increment own entry
+      self.vector_Clock[self.node_Id] += 1  # Increment own entry
       print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for local event.")
       return VectorMessage(message_type, self.node_Id, target_Id, self.vector_Clock.copy())
+
 
 if __name__ == "__main__":
   if len(sys.argv) != 3:
@@ -80,7 +83,7 @@ if __name__ == "__main__":
   node_id = int(sys.argv[1])
   known_nodes = list(range(1, int(sys.argv[2]) + 1))  # Assuming known nodes are numbered from 1 to N
 
-  node = VectorClockNode(node_id, known_nodes)
+  node = VectorClockNode(node_id, known_nodes, None)
 
   try:
     while True:
@@ -96,19 +99,19 @@ if __name__ == "__main__":
               Node {node.node_Id} \n \
               Known Nodes: {node.known_Nodes} \n \
               Vector Clock: {node.vector_Clock} \n \
-              Status: {node.status}")
+              Status: {node._status}")
 
       elif cmd == "contact":
         if len(full_cmd) < 2 or not full_cmd[1].isdigit():
           print("Usage: contact <target_node_id>")
           continue
-        
-        try: 
+
+        try:
           target_id = int(full_cmd[1])
           node.send_message(target_id, "CONTACT")
         except ValueError:
           print("Invalid target node ID.")
-      
+
       elif cmd == "exit":
         print(f"Shutting down Node {node.node_Id}.")
         break

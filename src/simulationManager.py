@@ -1,136 +1,73 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 
-# src/SimulationManager.py
+# src/main.py
 
-# This is the main simulation manager that holds the processes and handles the communication and an event logger for analyzing the results of the simulation.
-
-import socket
-import threading
-import time
+# script to run the simulation and nodes
+import os
 import sys
-import random
-import json
-
-SIM_PORT = 5000
-NODE_PORT_BASE = 6000
-MIN_DELAY = 0.5
-MAX_DELAY = 2.0
+import time
+import threading
+# autopep8: off
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.networkSimulation import networkSimulator
+from src.eventLogger import EventLogger
+from src.Lamport_timestamps.node import LamportNode
+from src.Vector_clocks.node import VectorClockNode
+# autopep8: on
 
 
 class SimulationManager:
-  def __init__(self, numNodes, minDelay=MIN_DELAY, maxDelay=MAX_DELAY):
-    # Initialize simulation manager with the node objects and an event logger
-    self.numNodes = numNodes
-    self.minDelay = minDelay
-    self.maxDelay = maxDelay
+  def __init__(self, num_nodes, NODE_TYPE="LAMPORT"):
+    # Initialize logger and network simulator
+    self.sim_manager = networkSimulator(num_nodes)
+    self.logger = EventLogger("simulation_log.txt")
+    self.nodes = []
+    self.NODE_TYPE = NODE_TYPE
 
-    self.messageQueue = []
-    self.queueLock = threading.Lock()
+  def setup_nodes(self, num_nodes):
+    # Start Nodes of the specified type
+    if self.NODE_TYPE == "LAMPORT":
+      NodeClass = LamportNode
+    elif self.NODE_TYPE == "VECTOR":
+      NodeClass = VectorClockNode
 
-    threading.Thread(target=self.listen, daemon=True).start()
-    threading.Thread(target=self.deliver_messages, daemon=True).start()
-
-    print(
-        f"Simulation Manager is running on Port {SIM_PORT} with {self.numNodes} nodes.")
-
-  def listen(self):
-    """Listens and receives incoming messages from nodes."""
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-      server.bind(("localhost", SIM_PORT))
-      server.listen()
-    except OSError as e:
-      print(f"Error starting simulation manager: {e}")
-      return
-
-    server.settimeout(1.0)
-
-    while True:
-      try:
-        conn, _ = server.accept()
-        raw_data = conn.recv(1024).decode("utf-8")
-        conn.close()
-        self.schedule_delivery(raw_data)
-      except socket.timeout:
-        continue
-      except Exception as e:
-        print(f"Simulation manager listener error: {e}")
-        continue
-
-  def schedule_delivery(self, message):
-    """Schedules a message for delivery after a random delay."""
-    try:
-      msg_data = json.loads(message)
-
-      delay = random.uniform(self.minDelay, self.maxDelay)
-      delivery_time = time.time() + delay
-
-      with self.queueLock:
-        self.messageQueue.append(
-            {
-                "message": message,
-                "target_id": msg_data["receiver_id"],
-                "delivery_time": delivery_time
-            }
-        )
-        self.messageQueue.sort(key=lambda x: x["delivery_time"])
-
-    except json.JSONDecodeError:
-      print(f"[SYSTEM] Failed to decode message: {message}")
-    except Exception as e:
-      print(f"[SYSTEM] Error scheduling delivery: {e}")
-
-  def deliver_messages(self):
-    """Delivers messages to their target nodes after the scheduled delay."""
-    while True:
-      now = time.time()
-      delivered_messages = []
-
-      with self.queueLock:
-        for i, msg in enumerate(self.messageQueue):
-          if msg["delivery_time"] <= now:
-            threading.Thread(target=self._forward_message, args=(msg,), daemon=True).start()
-            delivered_messages.append(i)
-          else:
-            break
-
-          for index in sorted(delivered_messages, reverse=True):
-            del self.messageQueue[index]
-
-            time.sleep(0.1)
-
-  def _forward_message(self, msg):
-    """Forwards the message to the target node."""
-    target_id = msg["target_id"]
-    target_port = NODE_PORT_BASE + target_id
-    msg_data = json.loads(msg["message"])
-
-    try:
-      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      s.connect(("localhost", target_port))
-      s.sendall(msg["message"].encode("utf-8"))
-      s.close()
-      print(f"[DELIVERED] {msg_data['msg_type']} to node {target_id}.")
-    except (ConnectionRefusedError, OSError):
-      print(f"[FAILED] Could not deliver message to node {target_id}. Node may be down.")
-
-      # Could implement retry logic here if desired
+    for node_id in range(1, num_nodes + 1):
+      known_nodes = list(range(1, num_nodes + 1))
+      node = NodeClass(node_id, known_nodes, self.logger)
+      threading.Thread(target=node.start, daemon=True).start()
+      self.nodes.append(node)
+      time.sleep(0.5)  # Stagger node startups
 
 
 if __name__ == "__main__":
-  if len(sys.argv) < 2:
-    print("Usage: python SimulationManager.py <num_nodes> [<min_delay>] [<max_delay>]")  # min_delay and max_delay are optional
-    sys.exit(1)
+  # If NODE_TYPE is specified, use it, else default to LAMPORT
+  if len(sys.argv) > 2:  # Should be the second arg
+    NODE_TYPE = sys.argv[2].upper()  # takes the second argument
+  else:
+    NODE_TYPE = "LAMPORT"
 
-  num_nodes = int(sys.argv[1])  # Number of nodes in the simulation
-  min_delay = float(sys.argv[2]) if len(sys.argv) > 2 else MIN_DELAY
-  max_delay = float(sys.argv[3]) if len(sys.argv) > 3 else MAX_DELAY
-  sim_manager = SimulationManager(num_nodes, min_delay, max_delay)
+  NUM_NODES = int(sys.argv[1])  # First argument is number of nodes
+  print(f"Starting simulation with {NUM_NODES} nodes of type {NODE_TYPE}")
+  sim_manager = SimulationManager(NUM_NODES, NODE_TYPE)
 
-  if sim_manager:
-    try:
-      while True:
-        time.sleep(1)
-    except KeyboardInterrupt:
-      print("Simulation Manager shutting down.")
-      sys.exit(0)
+  # Allow for terminal interaction
+  try:
+    while True:
+      cmd = input("Enter command: ").lower().strip().split()
+
+      if cmd[0] == "status":
+        node_id = int(cmd[1]) - 1
+        print(f"Status of Node {node_id}:")
+        sim_manager.nodes[node_id].status()
+
+      if cmd[0] == "contact":
+        node_id = int(cmd[1])
+        target_id = int(cmd[2])
+
+        print(f"Node {node_id} contacting Node {target_id}")
+
+        message = sim_manager.nodes[node_id - 1]._create_message(target_id, "CONTACT")
+        sim_manager.nodes[node_id - 1].send_message(target_id, message)
+
+  except KeyboardInterrupt:
+    print("\nShutting down simulation.")
