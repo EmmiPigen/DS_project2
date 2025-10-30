@@ -65,9 +65,12 @@ class LamportNode(LogicalNode):
         print(f"Node {self.node_Id} handling REQUEST from Node {msg.sender_id}")
         
 
-
   def local_event(self):
-    return 0
+    """Simulates a local event(non-communication event) and increments Lamport clock.""" 
+    with self.state_Lock:
+      self.lamport_Clock += 1
+      print (f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for local event.")
+      
 
   def _create_message(self, target_Id, message_type):
     """Creates a LamportMessage with the current Lamport clock."""
@@ -101,6 +104,18 @@ if __name__ == "__main__":
               Known Nodes: {node.known_Nodes} \n \
               Lamport Clock: {node.lamport_Clock} \n \
               Status: {node.status}")
+        
+      elif cmd == "contact":
+        if len(full_cmd) < 2 or not full_cmd[1].isdigit():
+          print("Usage: contact <target_node_id>")
+          continue
+        
+        try: 
+          target_id = int(full_cmd[1])
+          message = node._create_message(target_id, "CONTACT")
+          node.send_message(target_id, message)
+        except ValueError:
+          print("Invalid target node ID.")        
 
       elif cmd == "exit":
         print(f"Shutting down Node {node.node_Id}.")

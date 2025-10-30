@@ -98,6 +98,17 @@ if __name__ == "__main__":
               Vector Clock: {node.vector_Clock} \n \
               Status: {node.status}")
 
+      elif cmd == "contact":
+        if len(full_cmd) < 2 or not full_cmd[1].isdigit():
+          print("Usage: contact <target_node_id>")
+          continue
+        
+        try: 
+          target_id = int(full_cmd[1])
+          node.send_message(target_id, "CONTACT")
+        except ValueError:
+          print("Invalid target node ID.")
+      
       elif cmd == "exit":
         print(f"Shutting down Node {node.node_Id}.")
         break

@@ -6,6 +6,7 @@
 from abc import ABC, abstractmethod
 import socket
 import threading
+import json
 
 from src.simulationManager import SIM_PORT, NODE_PORT_BASE
 
@@ -70,7 +71,7 @@ class LogicalNode(ABC):
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       s.connect(("localhost", SIM_PORT))
 
-      s.sendall(message.encode("utf-8"))
+      s.sendall(json.dumps(message.to_dict()).encode("utf-8"))
       s.close()
 
       print(f"Node {self.node_Id} sent {message.msg_type} to Node {targetId}.")
