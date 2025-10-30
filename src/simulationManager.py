@@ -24,6 +24,8 @@ class SimulationManager:
     self.nodes = []
     self.NODE_TYPE = NODE_TYPE
 
+    self.setup_nodes(num_nodes)
+
   def setup_nodes(self, num_nodes):
     # Start Nodes of the specified type
     if self.NODE_TYPE == "LAMPORT":
@@ -68,6 +70,7 @@ if __name__ == "__main__":
 
         message = sim_manager.nodes[node_id - 1]._create_message(target_id, "CONTACT")
         sim_manager.nodes[node_id - 1].send_message(target_id, message)
+      time.sleep(3)  # Small delay to allow message processing
 
   except KeyboardInterrupt:
     print("\nShutting down simulation.")

@@ -14,7 +14,7 @@ import json
 SIM_PORT = 5000
 NODE_PORT_BASE = 6000
 MIN_DELAY = 0.5
-MAX_DELAY = 2.0
+MAX_DELAY = 1.0
 
 
 class networkSimulator:
@@ -110,7 +110,7 @@ class networkSimulator:
       s.connect(("localhost", target_port))
       s.sendall(msg["message"].encode("utf-8"))
       s.close()
-      print(f"[DELIVERED] {msg_data['msg_type']} to node {target_id}.")
+      # print(f"[DELIVERED] {msg_data['msg_type']} to node {target_id}.")
     except (ConnectionRefusedError, OSError):
       print(f"[FAILED] Could not deliver message to node {target_id}. Node may be down.")
 

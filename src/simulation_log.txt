@@ -1,0 +1,2 @@
+[16:13:11] Node 1 - SEND_MESSAGE (Clock: 1) Sent CONTACT to Node 3
+[16:13:13] Node 3 - RECEIVE_MESSAGE (Clock: 2) Received CONTACT from Node 1
