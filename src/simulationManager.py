@@ -3,9 +3,13 @@
 # src/main.py
 
 # script to run the simulation and nodes
+#autopep8: off
+import sys
+sys.dont_write_bytecode = True  # Prevent creation of .pyc files
+#autopep8: off
+
 import os
 from platform import node
-import sys
 import time
 import threading
 # autopep8: off
@@ -63,7 +67,7 @@ if __name__ == "__main__":
         print(f"Status of Node {node_id}:")
         sim_manager.nodes[node_id].status()
 
-      if cmd[0] == "request": #Sent a request for entry into critical section
+      if cmd[0] == "request":  # Sent a request for entry into critical section
         node_id = int(cmd[1])
         target_id = int(cmd[2])
 
@@ -71,8 +75,8 @@ if __name__ == "__main__":
 
         message = sim_manager.nodes[node_id - 1]._create_message(target_id, "REQUEST")
         sim_manager.nodes[node_id - 1].send_message(target_id, message)
-        
-      if cmd[0] == "contact": # for sending a contact message
+
+      if cmd[0] == "contact":  # for sending a contact message
         node_id = int(cmd[1])
         target_id = int(cmd[2])
 

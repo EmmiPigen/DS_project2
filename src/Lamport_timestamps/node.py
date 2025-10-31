@@ -2,7 +2,6 @@
 
 # src/Lamport_timestamps/node.py
 import sys
-sys.dont_write_bytecode = True  # Prevent creation of .pyc files
 import os
 import socket
 import threading
