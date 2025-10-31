@@ -57,7 +57,7 @@ Abstract LogicalNode {
 + start()
 + listen() void
 + {abstract} prcess_message() void
-+ {abstract} handle_message(msg) void
++ handle_message(msg) void
 + {abstract} _create_message(target_id, message_type)
 + broadcast(msg) void
 + {abstract} local_event() void

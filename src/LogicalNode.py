@@ -17,6 +17,8 @@ class LogicalNode(ABC):
     self.known_Nodes = known_Nodes
     self.PORT_BASE = NODE_PORT_BASE
     self.logger = logger  # Logger class to log events
+    self.request_queue = []
+    self.is_in_critical_section = False
 
     self._status = "IDLE"
     self.message_Queue = []
@@ -53,9 +55,13 @@ class LogicalNode(ABC):
   def process_message(self):
     pass
 
-  @abstractmethod
-  def handle_message(self, message):
-    pass
+  def handle_message(self, msg):
+    """Handles the received messages based on their type."""
+    if msg.msg_type == "CONTACT":
+      print(f"Node {self.node_Id} received CONTACT from Node {msg.sender_id}")
+
+    else:
+      print(f"Node {self.node_Id} received unknown message type: {msg.msg_type}")
 
   def broadcast(self, message):
     print(f"Node {self.node_Id} broadcasting {message.msg_type} to all known nodes.")

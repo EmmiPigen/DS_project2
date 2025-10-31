@@ -4,6 +4,7 @@
 
 # script to run the simulation and nodes
 import os
+from platform import node
 import sys
 import time
 import threading
@@ -20,7 +21,7 @@ class SimulationManager:
   def __init__(self, num_nodes, NODE_TYPE="LAMPORT"):
     # Initialize logger and network simulator
     self.sim_manager = networkSimulator(num_nodes)
-    self.logger = EventLogger("simulation_log.txt")
+    self.logger = EventLogger(f"simulationLog_{NODE_TYPE}.txt")
     self.nodes = []
     self.NODE_TYPE = NODE_TYPE
 
@@ -62,7 +63,16 @@ if __name__ == "__main__":
         print(f"Status of Node {node_id}:")
         sim_manager.nodes[node_id].status()
 
-      if cmd[0] == "contact":
+      if cmd[0] == "request": #Sent a request for entry into critical section
+        node_id = int(cmd[1])
+        target_id = int(cmd[2])
+
+        print(f"Node {node_id} requesting access to critical section from Node {target_id}")
+
+        message = sim_manager.nodes[node_id - 1]._create_message(target_id, "REQUEST")
+        sim_manager.nodes[node_id - 1].send_message(target_id, message)
+        
+      if cmd[0] == "contact": # for sending a contact message
         node_id = int(cmd[1])
         target_id = int(cmd[2])
 

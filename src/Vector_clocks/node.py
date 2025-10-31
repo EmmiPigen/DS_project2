@@ -21,10 +21,6 @@ class VectorClockNode(LogicalNode):
     self.vector_Clock = [0] * len(known_Nodes)  # Initialize vector clock
     super().__init__(node_Id, known_Nodes, logger)
 
-  def start(self):
-    threading.Thread(target=self.listen, daemon=True).start()
-    threading.Thread(target=self.process_message, daemon=True).start()
-
   def listen(self):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -56,13 +52,15 @@ class VectorClockNode(LogicalNode):
         with self.state_Lock:
           # Update vector clock
           self.vector_Clock = [max(vc1, vc2) for vc1, vc2 in zip(self.vector_Clock, msg.vector_clock)]
-          self.vector_Clock[self.node_Id] += 1  # Increment own entry
+          self.vector_Clock[self.node_Id - 1] += 1  # Increment own entry
+
+          # Log the event in the logger
+          self.logger.record_event(self.node_Id, "RECEIVE_MESSAGE", self.vector_Clock.copy(), details=f"Received {msg.msg_type} from Node {msg.sender_id}")
+
           print(f"Node {self.node_Id} updated vector clock to {self.vector_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
 
-  def handle_message(self, msg):
-    """Handles the received messages based on their type."""
-    return 0
+
 
   def local_event(self):
     return 0
@@ -70,7 +68,7 @@ class VectorClockNode(LogicalNode):
   def _create_message(self, target_Id, message_type):
     """Creates a VectorMessage with the current vector clock."""
     with self.state_Lock:
-      self.vector_Clock[self.node_Id] += 1  # Increment own entry
+      self.vector_Clock[self.node_Id - 1] += 1  # Increment own entry
       print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for local event.")
       return VectorMessage(message_type, self.node_Id, target_Id, self.vector_Clock.copy())
 

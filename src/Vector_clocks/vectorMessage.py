@@ -18,3 +18,12 @@ class VectorMessage:
             self.receiver_id == other.receiver_id and
             self.vector_clock == other.vector_clock and
             self.msg_type == other.msg_type)
+
+  def to_dict(self):
+    """Converts the VectorMessage to a dictionary for json encoding."""
+    return {
+      'msg_type': self.msg_type,
+      'sender_id': self.sender_id,
+      'receiver_id': self.receiver_id,
+      'vector_clock': self.vector_clock
+    }

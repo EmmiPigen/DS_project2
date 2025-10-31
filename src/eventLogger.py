@@ -17,11 +17,11 @@ class EventLogger:
 
   def record_event(self, node_id, event_type, clock, details=""):
     timestamp = self.getTime()
-    event = f"[{timestamp}] Node {node_id} - {event_type} (Clock: {clock}) {details}"
+    event = f" Node {node_id} - {event_type} (Clock: {clock}) - {details}"
     
     with open(self.log_file, "a") as f:
       f.write(f"{event}\n")
-    #print(f"[{timestamp}] [LOG] Node {node_id} - {event_type} (Clock: {clock}) {details}")
+
 
   def getTime(self):
     return time.strftime("%H:%M:%S", time.localtime())

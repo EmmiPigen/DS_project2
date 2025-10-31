@@ -1,8 +1,9 @@
 #!/usr/bin python3
 
 # src/Lamport_timestamps/node.py
-import os
 import sys
+sys.dont_write_bytecode = True  # Prevent creation of .pyc files
+import os
 import socket
 import threading
 import json
@@ -56,19 +57,7 @@ class LamportNode(LogicalNode):
           print(f"Node {self.node_Id} updated Lamport clock to {self.lamport_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
 
-  def handle_message(self, msg):
-    """Handles the received messages based on their type."""
-    match msg.msg_type:
 
-      case "REQUEST":
-        # Handle REQUEST message
-        print(f"Node {self.node_Id} handling REQUEST from Node {msg.sender_id}")
-
-      case "RELEASE":
-        pass
-
-      case "CONTACT":  # For testing purposes not for the algorithm
-        print(f"Node {self.node_Id} received CONTACT from Node {msg.sender_id}")
 
   def local_event(self):
     """Simulates a local event(non-communication event) and increments Lamport clock."""

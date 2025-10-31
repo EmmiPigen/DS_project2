@@ -23,8 +23,8 @@ class LamportMessage:
   def to_dict(self):
     """Converts the LamportMessage to a dictionary for json encoding."""
     return {
-      'msg_type': self.msg_type,
-      'sender_id': self.sender_id,
-      'receiver_id': self.receiver_id,
-      'timestamp': self.timestamp
+        'msg_type': self.msg_type,
+        'sender_id': self.sender_id,
+        'receiver_id': self.receiver_id,
+        'timestamp': self.timestamp
     }
