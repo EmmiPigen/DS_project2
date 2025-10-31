@@ -2,9 +2,7 @@
 
 # src/Lamport_timestamps/node.py
 import sys
-import os
 import socket
-import threading
 import json
 
 # autopep8: off
