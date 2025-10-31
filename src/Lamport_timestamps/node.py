@@ -19,9 +19,6 @@ class LamportNode(LogicalNode):
     self.lamport_Clock = 0  # Initialize Lamport clock
     super().__init__(node_Id, known_Nodes, logger)
 
-  def start(self):
-    threading.Thread(target=self.listen, daemon=True).start()
-    threading.Thread(target=self.process_message, daemon=True).start()
 
   def listen(self):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

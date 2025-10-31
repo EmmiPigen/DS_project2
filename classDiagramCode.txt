@@ -1,0 +1,94 @@
+@startuml
+
+title Lamport timestamp and vector clock
+page 1x1
+
+class SimulationManager {
+- nodes:  LogicalNode[]
+- NUM_NODES : int
+- NODE_TYPE : string
+
++ setup_nodes(NUM_NODES)
+}
+
+
+class EventLogger{
+- log_file : string
+
++ record_event(node_id, event_type, clock, details)
+}
+
+
+class NetworkSimulator {
+- numNode : int
+- minDelay : float
+- maxDelay : float
+- messageQueue : list[]
+
++ listen()
++ schedule_delivery(message)
++ deliver_messages()
++ _forward_message(message)
+
+}
+
+
+
+class Message {
++ sender_id : int
++ recipient_id : int
++ content : object
+
+}
+
+class LamportMessage {
++ timestamp : int
+}
+
+class VectorMessage {
++ vector_clock : int[]
+}
+
+Abstract LogicalNode {
++ node_id : int
++ known_node : list[]
++ logger : logger
+
++ start()
++ listen() void
++ {abstract} prcess_message() void
++ {abstract} handle_message(msg) void
++ {abstract} _create_message(target_id, message_type)
++ broadcast(msg) void
++ {abstract} local_event() void
++ send_message(recipient_id, msg) void
+}
+
+
+class LamportNode extends LogicalNode {
+- clock : int
+
+}
+
+
+class VectorNode extends LogicalNode {
+- clock : int[]
+
+- num_processes : int
+}
+
+
+SimulationManager *-- "*" LogicalNode : manages
+SimulationManager *-- "1" NetworkSimulator : uses
+SimulationManager o-- "1" EventLogger : uses
+
+EventLogger ..> LogicalNode : logs events
+
+
+Message <|-- LamportMessage
+Message <|-- VectorMessage
+
+LogicalNode --> NetworkSimulator : (for sending)
+LogicalNode --> Message : send / recieves
+
+@enduml

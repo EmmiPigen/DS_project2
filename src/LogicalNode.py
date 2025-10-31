@@ -23,7 +23,6 @@ class LogicalNode(ABC):
     self.queue_Lock = threading.Lock()
     self.state_Lock = threading.Lock()
 
-  @abstractmethod
   def start(self):
     threading.Thread(target=self.listen, daemon=True).start()
     threading.Thread(target=self.process_message, daemon=True).start()
