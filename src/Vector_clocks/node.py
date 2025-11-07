@@ -63,7 +63,12 @@ class VectorClockNode(LogicalNode):
 
 
   def local_event(self):
-    return 0
+    """Simulates a local event(non-communication event) and increments vector clock."""
+    print(f"Node {self.node_Id} performing local event.")
+    with self.state_Lock:
+      self.vector_Clock[self.node_Id - 1] += 1
+      print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for local event.")
+      self.logger.record_event(self.node_Id, "LOCAL_EVENT", self.vector_Clock.copy())
 
   def _create_message(self, target_Id, message_type):
     """Creates a VectorMessage with the current vector clock."""

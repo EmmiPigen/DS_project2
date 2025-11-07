@@ -94,10 +94,10 @@ class networkSimulator:
           else:
             break
 
-          for index in sorted(delivered_messages, reverse=True):
-            del self.messageQueue[index]
+        for index in sorted(delivered_messages, reverse=True):
+          del self.messageQueue[index]
 
-            time.sleep(0.1)
+          time.sleep(0.1)
 
   def _forward_message(self, msg):
     """Forwards the message to the target node."""

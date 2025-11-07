@@ -28,29 +28,11 @@ class LogicalNode(ABC):
   def start(self):
     threading.Thread(target=self.listen, daemon=True).start()
     threading.Thread(target=self.process_message, daemon=True).start()
-
+  
+  @abstractmethod
   def listen(self):
-    """Listens and receives incoming messages from other nodes via the simulator."""
-
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("localhost", self.PORT_BASE + self.node_Id))
-    server.listen()
-    server.settimeout(1.0)
-
-    print(f"Node {self.node_Id} listening on port {self.PORT_BASE + self.node_Id}")
-
-    while True:
-      try:
-        conn, _ = server.accept()
-        raw_data = conn.recv(1024).decode("utf-8")
-        print("Message:", raw_data)
-        conn.close()
-        with self.queue_Lock:
-          self.message_Queue.append(raw_data)
-      except socket.timeout:
-        continue
-
+    pass
+  
   @abstractmethod
   def process_message(self):
     pass
