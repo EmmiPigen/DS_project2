@@ -1,11 +1,8 @@
 #!/usr/bin python3
 
 # src/vector_clocks/node.py
-import os
 import sys
-import pickle
 import socket
-import threading
 import json
 
 

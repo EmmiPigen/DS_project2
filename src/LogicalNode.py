@@ -45,12 +45,6 @@ class LogicalNode(ABC):
     else:
       print(f"Node {self.node_Id} received unknown message type: {msg.msg_type}")
 
-  def broadcast(self, message):
-    print(f"Node {self.node_Id} broadcasting {message.msg_type} to all known nodes.")
-    for target_Id in self.known_Nodes:
-      if target_Id != self.node_Id:
-        target_message = self._create_message(target_Id, message.msg_type)
-        self.send_message(target_Id, target_message)
 
   @abstractmethod
   def _create_message(self, target_Id, message_type):
