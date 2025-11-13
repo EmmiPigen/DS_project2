@@ -4,10 +4,10 @@
 			"path": ".."
 		},
 		{
-			"path": "../../Project_1/DS_project1"
+			"path": "../../Project_1/DS_Project1_Report"
 		}
 	],
 	"settings": {
-		"pinnedProjects.lock": true
+		"pinnedProjects.lock": false
 	}
 }
