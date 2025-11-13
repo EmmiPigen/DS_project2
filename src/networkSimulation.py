@@ -116,6 +116,9 @@ class networkSimulator:
 
       # Could implement retry logic here if desired
 
+  def shutdown(self):
+    """Shuts down the network simulator."""
+    sys.exit(0)
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:

@@ -5,8 +5,11 @@
 # Abstract LogicalNode class representing to build the Lamport timestamp and vector clock nodes upon.
 from abc import ABC, abstractmethod
 import socket
+import sys
 import threading
 import json
+
+from regex import D
 
 from src.networkSimulation import SIM_PORT, NODE_PORT_BASE
 
@@ -69,3 +72,7 @@ class LogicalNode(ABC):
   @abstractmethod
   def local_event(self):
     pass
+
+  def stop(self):
+    """Stops the node's operations."""
+    sys.exit(0)

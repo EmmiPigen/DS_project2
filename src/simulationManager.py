@@ -67,14 +67,6 @@ if __name__ == "__main__":
         print(f"Status of Node {node_id}:")
         sim_manager.nodes[node_id].status()
 
-      if cmd[0] == "request":  # Sent a request for entry into critical section
-        node_id = int(cmd[1])
-        target_id = int(cmd[2])
-
-        print(f"Node {node_id} requesting access to critical section from Node {target_id}")
-
-        message = sim_manager.nodes[node_id - 1]._create_message(target_id, "REQUEST")
-        sim_manager.nodes[node_id - 1].send_message(target_id, message)
 
       if cmd[0] == "contact":  # for sending a contact message
         node_id = int(cmd[1])
