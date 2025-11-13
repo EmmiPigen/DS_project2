@@ -63,6 +63,7 @@ class LogicalNode(ABC):
 
       s.sendall(json.dumps(message.to_dict()).encode("utf-8"))
       s.close()
+      self._status = "IDLE"
 
       print(f"Node {self.node_Id} sent {message.msg_type} to Node {targetId}.")
 

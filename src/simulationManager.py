@@ -22,10 +22,10 @@ from src.Vector_clocks.node import VectorClockNode
 
 
 class SimulationManager:
-  def __init__(self, num_nodes, NODE_TYPE="LAMPORT"):
+  def __init__(self, num_nodes, NODE_TYPE="LAMPORT", logger=None):
     # Initialize logger and network simulator
     self.sim_manager = networkSimulator(num_nodes)
-    self.logger = EventLogger(f"simulationLog_{NODE_TYPE}.txt")
+    self.logger = EventLogger(f"simulationLog_{NODE_TYPE}.txt") if logger is None else logger
     self.nodes = []
     self.NODE_TYPE = NODE_TYPE
 
@@ -44,7 +44,6 @@ class SimulationManager:
       threading.Thread(target=node.start, daemon=True).start()
       self.nodes.append(node)
       time.sleep(0.5)  # Stagger node startups
-
 
 if __name__ == "__main__":
   # If NODE_TYPE is specified, use it, else default to LAMPORT

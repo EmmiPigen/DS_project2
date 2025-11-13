@@ -1,0 +1,9 @@
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": 1, "details": "Sent CONTACT to Node 2"}
+{"node_id": 2, "event_type": "RECEIVE_MESSAGE", "clock": 2, "details": "Received CONTACT from Node 1"}
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": 2, "details": "Sent CONTACT to Node 2"}
+{"node_id": 2, "event_type": "RECEIVE_MESSAGE", "clock": 3, "details": "Received CONTACT from Node 1"}
+{"node_id": 2, "event_type": "SEND_MESSAGE", "clock": 4, "details": "Sent CONTACT to Node 3"}
+{"node_id": 3, "event_type": "RECEIVE_MESSAGE", "clock": 5, "details": "Received CONTACT from Node 2"}
+{"node_id": 3, "event_type": "LOCAL_EVENT", "clock": 6, "details": ""}
+{"node_id": 3, "event_type": "SEND_MESSAGE", "clock": 7, "details": "Sent CONTACT to Node 4"}
+{"node_id": 4, "event_type": "RECEIVE_MESSAGE", "clock": 8, "details": "Received CONTACT from Node 3"}

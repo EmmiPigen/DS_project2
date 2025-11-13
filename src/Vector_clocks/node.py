@@ -35,7 +35,9 @@ class VectorClockNode(LogicalNode):
         conn.close()
         msg_obj = VectorMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], msg['vector_clock'])
         with self.queue_Lock:
+          self._status = "RECEIVING"
           self.message_Queue.append(msg_obj)
+          self._status = "IDLE"
       except socket.timeout:
         continue
 
@@ -48,6 +50,7 @@ class VectorClockNode(LogicalNode):
           msg = self.message_Queue.pop(0)  # Get the first message in the queue
       if msg:
         with self.state_Lock:
+          self._status = "RECEIVING"
           # Update vector clock
           self.vector_Clock = [max(vc1, vc2) for vc1, vc2 in zip(self.vector_Clock, msg.vector_clock)]
           self.vector_Clock[self.node_Id - 1] += 1  # Increment own entry
@@ -57,18 +60,22 @@ class VectorClockNode(LogicalNode):
 
           print(f"Node {self.node_Id} updated vector clock to {self.vector_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
+          self._status = "IDLE"
 
   def local_event(self):
     """Simulates a local event(non-communication event) and increments vector clock."""
     print(f"Node {self.node_Id} performing local event.")
     with self.state_Lock:
+      self._status = "LOCAL_EVENT"
       self.vector_Clock[self.node_Id - 1] += 1
       print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for local event.")
       self.logger.record_event(self.node_Id, "LOCAL_EVENT", self.vector_Clock.copy())
+      self._status = "IDLE"
 
   def _create_message(self, target_Id, message_type):
     """Creates a VectorMessage with the current vector clock."""
     with self.state_Lock:
+      self._status = "SENDING"
       self.vector_Clock[self.node_Id - 1] += 1  # Increment own entry
       print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for sending message.")
       return VectorMessage(message_type, self.node_Id, target_Id, self.vector_Clock.copy())

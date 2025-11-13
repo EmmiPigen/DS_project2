@@ -13,8 +13,8 @@ import json
 
 SIM_PORT = 5000
 NODE_PORT_BASE = 6000
-MIN_DELAY = 0.5
-MAX_DELAY = 1.0
+MIN_DELAY = 0.1
+MAX_DELAY = 0.5
 
 
 class networkSimulator:

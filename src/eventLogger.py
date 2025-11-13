@@ -4,6 +4,7 @@
 
 # Class for logging all event data for analysis after the simulation
 import time
+import json
 
 
 class EventLogger:
@@ -16,11 +17,15 @@ class EventLogger:
       f.write("")
 
   def record_event(self, node_id, event_type, clock, details=""):
-    timestamp = self.getTime()
-    event = f" Node {node_id} - {event_type} (Clock: {clock}) - {details}"
+    event = {
+      "node_id": node_id,
+      "event_type": event_type,
+      "clock": clock,
+      "details": details
+    }
     
     with open(self.log_file, "a") as f:
-      f.write(f"{event}\n")
+      f.write(json.dumps(event) + "\n")
 
 
   def getTime(self):

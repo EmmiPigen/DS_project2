@@ -35,7 +35,9 @@ class LamportNode(LogicalNode):
         conn.close()
         msg_obj = LamportMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], msg['timestamp'])
         with self.queue_Lock:
+          self._status = "RECEIVING"
           self.message_Queue.append(msg_obj)
+          self._status = "IDLE"
       except socket.timeout:
         continue
 
@@ -47,6 +49,7 @@ class LamportNode(LogicalNode):
         if self.message_Queue:
           msg = self.message_Queue.pop(0)  # Get the first message in the queue
       if msg:
+        self._status = "RECEIVING"
         with self.state_Lock:
           # Update Lamport clock following Lamport's rules: C = max(C, T) + 1
           self.lamport_Clock = max(self.lamport_Clock, msg.timestamp) + 1
@@ -54,17 +57,21 @@ class LamportNode(LogicalNode):
 
           print(f"Node {self.node_Id} updated Lamport clock to {self.lamport_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
+          self._status = "IDLE"
 
   def local_event(self):
     """Simulates a local event(non-communication event) and increments Lamport clock."""
     print(f"Node {self.node_Id} performing local event.")
     with self.state_Lock:
+      self._status = "LOCAL_EVENT"
       self.lamport_Clock += 1
       self.logger.record_event(self.node_Id, "LOCAL_EVENT", self.lamport_Clock)
+      self._status = "IDLE"
 
   def _create_message(self, target_Id, message_type):
     """Creates a LamportMessage with the current Lamport clock."""
     with self.state_Lock:
+      self._status = "SENDING"
       self.lamport_Clock += 1
       print(f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for sending message.")
       return LamportMessage(message_type, self.node_Id, target_Id, self.lamport_Clock)
