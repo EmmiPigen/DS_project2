@@ -19,6 +19,7 @@ class LamportNode(LogicalNode):
 
 
   def listen(self):
+    """Listens for incoming messages and appends them to the message queue."""
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("localhost", self.PORT_BASE + self.node_Id))
@@ -54,8 +55,6 @@ class LamportNode(LogicalNode):
           print(f"Node {self.node_Id} updated Lamport clock to {self.lamport_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
 
-
-
   def local_event(self):
     """Simulates a local event(non-communication event) and increments Lamport clock."""
     print(f"Node {self.node_Id} performing local event.")
@@ -67,7 +66,7 @@ class LamportNode(LogicalNode):
     """Creates a LamportMessage with the current Lamport clock."""
     with self.state_Lock:
       self.lamport_Clock += 1
-      print(f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for local event.")
+      print(f"Node {self.node_Id} incremented Lamport clock to {self.lamport_Clock} for sending message.")
       return LamportMessage(message_type, self.node_Id, target_Id, self.lamport_Clock)
 
   def status(self):

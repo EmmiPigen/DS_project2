@@ -19,6 +19,7 @@ class VectorClockNode(LogicalNode):
     super().__init__(node_Id, known_Nodes, logger)
 
   def listen(self):
+    """Listens for incoming messages and appends them to the message queue."""
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("localhost", self.PORT_BASE + self.node_Id))
@@ -57,8 +58,6 @@ class VectorClockNode(LogicalNode):
           print(f"Node {self.node_Id} updated vector clock to {self.vector_Clock} after receiving message from Node {msg.sender_id}")
           self.handle_message(msg)
 
-
-
   def local_event(self):
     """Simulates a local event(non-communication event) and increments vector clock."""
     print(f"Node {self.node_Id} performing local event.")
@@ -71,10 +70,18 @@ class VectorClockNode(LogicalNode):
     """Creates a VectorMessage with the current vector clock."""
     with self.state_Lock:
       self.vector_Clock[self.node_Id - 1] += 1  # Increment own entry
-      print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for local event.")
+      print(f"Node {self.node_Id} incremented its vector clock to {self.vector_Clock} for sending message.")
       return VectorMessage(message_type, self.node_Id, target_Id, self.vector_Clock.copy())
 
-
+  def status(self):
+    """Helper method to print the current status of the node."""
+    print(f" \
+              Node {self.node_Id} \n \
+              Known Nodes: {self.known_Nodes} \n \
+              Vector Clock: {self.vector_Clock} \n \
+              Status: {self._status}")
+    
+    
 if __name__ == "__main__":
   if len(sys.argv) != 3:
     print("Usage: python node.py <node_id> <known_nodes>")
