@@ -1,3 +1,4 @@
 --- New Test Run ---
 {"node_id": 1, "event_type": "LOCAL_EVENT", "clock": [1, 0, 0, 0], "details": ""}
 {"node_id": 2, "event_type": "LOCAL_EVENT", "clock": [0, 1, 0, 0], "details": ""}
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [2, 0, 0, 0], "details": "Sent CONTACT to Node 2"}

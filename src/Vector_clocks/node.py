@@ -13,6 +13,7 @@ from src.Vector_clocks.vectorMessage import VectorMessage
 
 # autopep8: on
 
+
 class VectorClockNode(LogicalNode):
   def __init__(self, node_Id, known_Nodes, logger):
     self.vector_Clock = [0] * len(known_Nodes)  # Initialize vector clock
@@ -31,20 +32,43 @@ class VectorClockNode(LogicalNode):
     while self.is_alive:
       try:
         conn, _ = self.server.accept()
-        msg = json.loads(conn.recv(1024).decode("utf-8"))
-        conn.close()
-        hex_clock = msg['vector_clock']
-        raw_clock = binascii.unhexlify(hex_clock.encode('utf-8'))
-        num_nodes = len(raw_clock) // 4
-        vector_clock = list(struct.unpack('!' + 'I' * num_nodes, raw_clock))
-
-        msg_obj = VectorMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], vector_clock)
-        with self.queue_Lock:
-          self._status = "RECEIVING"
-          self.message_Queue.append(msg_obj)
-          self._status = "IDLE"
       except socket.timeout:
         continue
+      except OSError:
+        break
+
+      try:
+        data = conn.recv(1024)
+        if not data:
+          conn.close()
+          continue
+        msg = json.loads(data.decode("utf-8"))
+        conn.close()
+      except:
+        conn.close()
+        continue
+        # Accept either a hex-encoded packed vector clock (preferred) or
+        # a plain Python list (legacy/compatibility). If it's a hex string,
+        # unpack it into integers packed as network-order unsigned ints ('!I').
+      raw_clock_field = msg.get('vector_clock')
+      if isinstance(raw_clock_field, str):
+        try:
+          raw_clock = binascii.unhexlify(raw_clock_field.encode('utf-8'))
+          num_nodes = len(raw_clock) // 4
+          vector_clock = list(struct.unpack('!' + 'I' * num_nodes, raw_clock))
+        except (binascii.Error, struct.error):
+          # Fallback to empty list on decode error
+          vector_clock = []
+      elif isinstance(raw_clock_field, list):
+        # Already a list (older sender), accept directly
+        vector_clock = raw_clock_field
+      else:
+        vector_clock = []
+      msg_obj = VectorMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], vector_clock)
+      with self.queue_Lock:
+        self._status = "RECEIVING"
+        self.message_Queue.append(msg_obj)
+        self._status = "IDLE"
 
   def process_message(self):
     """Allows the node to process incoming messages and update vector clock."""

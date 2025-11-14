@@ -35,19 +35,19 @@ class networkSimulator:
 
   def listen(self):
     """Listens and receives incoming messages from nodes."""
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-      server.bind(("localhost", SIM_PORT))
-      server.listen()
+      self.server.bind(("localhost", SIM_PORT))
+      self.server.listen()
     except OSError as e:
       print(f"Error starting network simulator: {e}")
       return
 
-    server.settimeout(1.0)
+    self.server.settimeout(1.0)
 
     while True:
       try:
-        conn, _ = server.accept()
+        conn, _ = self.server.accept()
         raw_data = conn.recv(1024).decode("utf-8")
         conn.close()
         self.schedule_delivery(raw_data)

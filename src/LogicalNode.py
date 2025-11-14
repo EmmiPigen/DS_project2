@@ -8,6 +8,8 @@ import socket
 import sys
 import threading
 import json
+import struct
+import binascii
 
 from regex import D
 
@@ -60,10 +62,17 @@ class LogicalNode(ABC):
       self.logger.record_event(self.node_Id, "SEND_MESSAGE",
                                getattr(self, 'lamport_Clock', getattr(self, 'vector_Clock', None)),
                                details=f"Sent {message.msg_type} to Node {targetId}")
+      # Build payload from message dict. If this is a vector-clock message
+      # the `vector_clock` may be a Python list; pack to bytes and hex-encode
+      # so JSON remains text-safe and consistent with the listener decoding.
+      payload = message.to_dict()
+      if 'vector_clock' in payload and isinstance(payload['vector_clock'], list):
+        packed = b''.join(struct.pack('!I', int(v)) for v in payload['vector_clock'])
+        payload['vector_clock'] = binascii.hexlify(packed).decode('utf-8')
+
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       s.connect(("localhost", SIM_PORT))
-
-      s.sendall(json.dumps(message.to_dict()).encode("utf-8"))
+      s.sendall(json.dumps(payload).encode("utf-8"))
       s.close()
       self._status = "IDLE"
 
