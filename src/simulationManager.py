@@ -17,7 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.networkSimulation import networkSimulator
 from src.eventLogger import EventLogger
 from src.Lamport_timestamps.node import LamportNode
-from src.Vector_clocks.node import VectorClockNode
+from src.Vector_clocks.node import VectorClockNode 
 # autopep8: on
 
 
@@ -33,17 +33,17 @@ class SimulationManager:
 
   def setup_nodes(self, num_nodes):
     # Start Nodes of the specified type
+    if self.NODE_TYPE == "VECTOR":
+      NodeClass = VectorClockNode
     if self.NODE_TYPE == "LAMPORT":
       NodeClass = LamportNode
-    elif self.NODE_TYPE == "VECTOR":
-      NodeClass = VectorClockNode
 
     for node_id in range(1, num_nodes + 1):
       known_nodes = list(range(1, num_nodes + 1))
       node = NodeClass(node_id, known_nodes, self.logger)
       threading.Thread(target=node.start, daemon=True).start()
       self.nodes.append(node)
-      time.sleep(0.5)  # Stagger node startups
+      time.sleep(0.2)  # Stagger node startups
 
 if __name__ == "__main__":
   # If NODE_TYPE is specified, use it, else default to LAMPORT

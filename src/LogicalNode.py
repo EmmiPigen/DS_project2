@@ -22,6 +22,7 @@ class LogicalNode(ABC):
     self.logger = logger  # Logger class to log events
     self.request_queue = []
     self.is_in_critical_section = False
+    self.is_alive = True
 
     self._status = "IDLE"
     self.message_Queue = []
@@ -29,13 +30,15 @@ class LogicalNode(ABC):
     self.state_Lock = threading.Lock()
 
   def start(self):
-    threading.Thread(target=self.listen, daemon=True).start()
-    threading.Thread(target=self.process_message, daemon=True).start()
-  
+    self.listener_thread = threading.Thread(target=self.listen, daemon=True)
+    self.processor_thread = threading.Thread(target=self.process_message, daemon=True)
+    self.listener_thread.start()
+    self.processor_thread.start()
+
   @abstractmethod
   def listen(self):
     pass
-  
+
   @abstractmethod
   def process_message(self):
     pass
@@ -47,7 +50,6 @@ class LogicalNode(ABC):
 
     else:
       print(f"Node {self.node_Id} received unknown message type: {msg.msg_type}")
-
 
   @abstractmethod
   def _create_message(self, target_Id, message_type):
@@ -74,6 +76,6 @@ class LogicalNode(ABC):
   def local_event(self):
     pass
 
+  @abstractmethod
   def stop(self):
-    """Stops the node's operations."""
-    sys.exit(0)
+    pass

@@ -17,20 +17,19 @@ class LamportNode(LogicalNode):
     self.lamport_Clock = 0  # Initialize Lamport clock
     super().__init__(node_Id, known_Nodes, logger)
 
-
   def listen(self):
     """Listens for incoming messages and appends them to the message queue."""
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("localhost", self.PORT_BASE + self.node_Id))
-    server.listen()
-    server.settimeout(1.0)
+    self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    self.server.bind(("localhost", self.PORT_BASE + self.node_Id))
+    self.server.listen()
+    self.server.settimeout(1.0)
 
     print(f"Node {self.node_Id} listening on port {self.PORT_BASE + self.node_Id}")
 
-    while True:
+    while self.is_alive:
       try:
-        conn, _ = server.accept()
+        conn, _ = self.server.accept()
         msg = json.loads(conn.recv(1024).decode("utf-8"))
         conn.close()
         msg_obj = LamportMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], msg['timestamp'])
@@ -82,6 +81,15 @@ class LamportNode(LogicalNode):
               Known Nodes: {self.known_Nodes} \n \
               Lamport Clock: {self.lamport_Clock} \n \
               Status: {self._status}")
+
+  def stop(self):
+    """Stops the node's operations."""
+    try:
+      self.server.shutdown(socket.SHUT_RDWR)
+      self.server.close()
+    except Exception as e:
+      pass
+
 
 
 if __name__ == "__main__":

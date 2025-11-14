@@ -4,14 +4,14 @@
 import sys
 import socket
 import json
-
+import struct
+import binascii
 
 # autopep8: off
 from src.LogicalNode import LogicalNode
 from src.Vector_clocks.vectorMessage import VectorMessage
 
 # autopep8: on
-
 
 class VectorClockNode(LogicalNode):
   def __init__(self, node_Id, known_Nodes, logger):
@@ -20,20 +20,25 @@ class VectorClockNode(LogicalNode):
 
   def listen(self):
     """Listens for incoming messages and appends them to the message queue."""
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("localhost", self.PORT_BASE + self.node_Id))
-    server.listen()
-    server.settimeout(1.0)
+    self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    self.server.bind(("localhost", self.PORT_BASE + self.node_Id))
+    self.server.listen()
+    self.server.settimeout(1.0)
 
     print(f"Node {self.node_Id} listening on port {self.PORT_BASE + self.node_Id}")
 
-    while True:
+    while self.is_alive:
       try:
-        conn, _ = server.accept()
+        conn, _ = self.server.accept()
         msg = json.loads(conn.recv(1024).decode("utf-8"))
         conn.close()
-        msg_obj = VectorMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], msg['vector_clock'])
+        hex_clock = msg['vector_clock']
+        raw_clock = binascii.unhexlify(hex_clock.encode('utf-8'))
+        num_nodes = len(raw_clock) // 4
+        vector_clock = list(struct.unpack('!' + 'I' * num_nodes, raw_clock))
+
+        msg_obj = VectorMessage(msg['msg_type'], msg['sender_id'], msg['receiver_id'], vector_clock)
         with self.queue_Lock:
           self._status = "RECEIVING"
           self.message_Queue.append(msg_obj)
@@ -49,8 +54,8 @@ class VectorClockNode(LogicalNode):
         if self.message_Queue:
           msg = self.message_Queue.pop(0)  # Get the first message in the queue
       if msg:
+        self._status = "RECEIVING"
         with self.state_Lock:
-          self._status = "RECEIVING"
           # Update vector clock
           self.vector_Clock = [max(vc1, vc2) for vc1, vc2 in zip(self.vector_Clock, msg.vector_clock)]
           self.vector_Clock[self.node_Id - 1] += 1  # Increment own entry
@@ -88,7 +93,15 @@ class VectorClockNode(LogicalNode):
               Vector Clock: {self.vector_Clock} \n \
               Status: {self._status}")
     
+  def stop(self):
+    """Stops the node's operations."""
+    try:
+      self.server.shutdown(socket.SHUT_RDWR)
+      self.server.close()
+    except Exception as e:
+      pass
     
+
 if __name__ == "__main__":
   if len(sys.argv) != 3:
     print("Usage: python node.py <node_id> <known_nodes>")

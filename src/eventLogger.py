@@ -28,5 +28,3 @@ class EventLogger:
       f.write(json.dumps(event) + "\n")
 
 
-  def getTime(self):
-    return time.strftime("%H:%M:%S", time.localtime())

@@ -1,5 +1,7 @@
 # src/Vector_clocks/vectorMessage.py
 # VectorMessage class for representing messages with vector timestamps in a distributed system.
+import struct
+import binascii
 
 class VectorMessage:
   def __init__(self, msg_type, sender_id, receiver_id, vector_clock):  # Constructor for the message class
@@ -20,10 +22,12 @@ class VectorMessage:
             self.msg_type == other.msg_type)
 
   def to_dict(self):
-    """Converts the VectorMessage to a dictionary for json encoding."""
+    """Converts the VectorMessage to a dictionary for binary serialization."""
+    packed_clock = b''.join(struct.pack('!I', vc) for vc in self.vector_clock)
+    hex_clock = binascii.hexlify(packed_clock).decode('utf-8')
     return {
       'msg_type': self.msg_type,
       'sender_id': self.sender_id,
       'receiver_id': self.receiver_id,
-      'vector_clock': self.vector_clock
+      'vector_clock': hex_clock
     }
