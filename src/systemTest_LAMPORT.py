@@ -215,7 +215,7 @@ def test_message_complexity(node_setup):
   assert avg_size == 4, "Lamport clock message size too large, expected O(1) complexity."
 
 
-def test_space_complexity(node_setup):
+def test_space_complexity(node_setup):  
   """
   Test space complexity to show that Vector Clocks have higher overhead to store the clocks than Lamport clocks.
   """
