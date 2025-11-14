@@ -34,12 +34,12 @@ After starting the simulation manager, you can control each node in the same ter
 A system test file `systemTest.py` is used to test the implementation of both Lamport timestamps and vector clocks and testing for the correctness of the ordering of events and the overhead analysis. To run the tests, navigate to the `src` folder in your terminal and run the following command:
 
 ```bash
-pytest -v .\systemTest.py
+pytest -v .\systemTest<NODE_TYPE>.py
 ```
 
+Where `<NODE_TYPE>` is either "LAMPORT" or "VECTOR", depending on which implementation you want to test, The tests runs and the log for the test can be seen in the files `simulationLog_LAMPORT.txt` and `simulationLog_VECTOR.txt` respectively.
+
+The test have been run fully and the results are in the files `simulationLog_LAMPORTSystemTest.txt` and `simulationLog_VECTORSystemTest.txt` respectively. But you can run the tests again if you want to verify the implementation or make changes to the code.
+
 ## Note 
-The implementation is a simulation and does not handle all edge cases or failures that may occur in a real distributed system. It is intended for educational purposes to demonstrate the Bully Election Algorithm and its improved version.
-
-The implementation assumes that all nodes are started manually and that the network simulator is running before starting any nodes, initial election are not automatically started when nodes are started, and should be initiated manually by entering the `election` command in the node terminal.
-
-When node recovers (revive command), it does automatically start an election, as per the Bully algorithm specification.
+The implementation is a simulation and does not handle all edge cases or failures that may occur in a real distributed system. It is intended for educational purposes to demonstrate the concepts of Lamport timestamps and vector clocks in distributed systems.
