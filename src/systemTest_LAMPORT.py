@@ -206,6 +206,8 @@ def test_message_complexity(node_setup):
       clock = entry['clock']
       # Serialize clock to measure size
       packed = struct.pack('!I', clock)  # 4 bytes for Lamport clock
+      message_sizes.append(len(packed))
+
 
   avg_size = sum(message_sizes) / len(message_sizes)
   print(f"Average message size for {NODE_TYPE} clocks: {avg_size} bytes")

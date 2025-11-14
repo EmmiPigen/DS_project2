@@ -1,4 +1,20 @@
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [1, 0, 0, 0], "details": "Sent CONTACT to Node 2"}
+{"node_id": 2, "event_type": "RECEIVE_MESSAGE", "clock": [1, 1, 0, 0], "details": "Received CONTACT from Node 1"}
+--- New Test Run ---
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [1, 0, 0, 0], "details": "Sent CONTACT to Node 2"}
+{"node_id": 2, "event_type": "RECEIVE_MESSAGE", "clock": [1, 1, 0, 0], "details": "Received CONTACT from Node 1"}
+{"node_id": 2, "event_type": "SEND_MESSAGE", "clock": [1, 2, 0, 0], "details": "Sent CONTACT to Node 3"}
+{"node_id": 3, "event_type": "RECEIVE_MESSAGE", "clock": [1, 2, 1, 0], "details": "Received CONTACT from Node 2"}
+{"node_id": 3, "event_type": "LOCAL_EVENT", "clock": [1, 2, 2, 0], "details": ""}
+{"node_id": 3, "event_type": "SEND_MESSAGE", "clock": [1, 2, 3, 0], "details": "Sent CONTACT to Node 4"}
+{"node_id": 4, "event_type": "RECEIVE_MESSAGE", "clock": [1, 2, 3, 1], "details": "Received CONTACT from Node 3"}
+--- New Test Run ---
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [1, 0, 0, 0], "details": "Sent CONTACT to Node 2"}
+{"node_id": 2, "event_type": "RECEIVE_MESSAGE", "clock": [1, 1, 0, 0], "details": "Received CONTACT from Node 1"}
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [2, 0, 0, 0], "details": "Sent CONTACT to Node 3"}
+{"node_id": 3, "event_type": "RECEIVE_MESSAGE", "clock": [2, 0, 1, 0], "details": "Received CONTACT from Node 1"}
+{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [3, 0, 0, 0], "details": "Sent CONTACT to Node 4"}
+{"node_id": 4, "event_type": "RECEIVE_MESSAGE", "clock": [3, 0, 0, 1], "details": "Received CONTACT from Node 1"}
 --- New Test Run ---
 {"node_id": 1, "event_type": "LOCAL_EVENT", "clock": [1, 0, 0, 0], "details": ""}
 {"node_id": 2, "event_type": "LOCAL_EVENT", "clock": [0, 1, 0, 0], "details": ""}
-{"node_id": 1, "event_type": "SEND_MESSAGE", "clock": [2, 0, 0, 0], "details": "Sent CONTACT to Node 2"}

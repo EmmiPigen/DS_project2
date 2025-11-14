@@ -247,7 +247,6 @@ def test_space_complexity(node_setup):
   assert avg_space == expected_size, "Vector clock space usage too small, expected O(N) complexity."
 
 # Only for vector clocks
-@pytest.mark.parametrize("node_setup", ["VECTOR"], indirect=True)
 def test_partial_ordering(node_setup):
   """
   Test that vector clocks can identify concurrent events.
