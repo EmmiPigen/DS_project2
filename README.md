@@ -37,9 +37,9 @@ A system test file `systemTest.py` is used to test the implementation of both La
 pytest -v .\systemTest<NODE_TYPE>.py
 ```
 
-Where `<NODE_TYPE>` is either "LAMPORT" or "VECTOR", depending on which implementation you want to test, The tests runs and the log for the test can be seen in the files `simulationLog_LAMPORT.txt` and `simulationLog_VECTOR.txt` respectively.
+Where `<NODE_TYPE>` is either "LAMPORT" or "VECTOR", depending on which implementation you want to test, The tests runs and the log for the test can be seen in the files `simulationLog_LAMPORT.txt` and `simulationLog_VECTOR.txt` respectively. These files resets each time the simulation manager is started, so both tests and manual runs will be logged there, but cleared when the simulation manager is restarted.
 
-The test have been run fully and the results are in the files `simulationLog_LAMPORTSystemTest.txt` and `simulationLog_VECTORSystemTest.txt` respectively. But you can run the tests again if you want to verify the implementation or make changes to the code.
+A full test have been run with the  results located in the files `simulationLog_LAMPORTSystemTest.txt` and `simulationLog_VECTORSystemTest.txt` respectively. But you can run the tests again if you want to verify the implementation yourself.
 
 ## Note 
 The implementation is a simulation and does not handle all edge cases or failures that may occur in a real distributed system. It is intended for educational purposes to demonstrate the concepts of Lamport timestamps and vector clocks in distributed systems.
